@@ -6,9 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,78 +20,90 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-public class
-ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
+    private List<Chat> chatList;
+    private String nickname = "익명1";
 
-    private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private List<ChatData> chatList;
-    private String nick = "nickname"; // 1:1 or 1:da로
+    private EditText chatText;
+    private Button sendButton;
 
-    private EditText EditText_chat;
-    private Button Button_send;
     private DatabaseReference myRef;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_chat);
+        setContentView(R.layout.activity_main);
 
-        Button_send = findViewById(R.id.Button_send);
-        EditText_chat = findViewById(R.id.EditText_chat);
+        chatText = findViewById(R.id.chatText);
+        sendButton = findViewById(R.id.sendButton);
 
-        //샌드 눌렀을떄
-        Button_send.setOnClickListener(new View.OnClickListener() {
+        sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                String msg = EditText_chat.getText().toString(); //msg
-                //널이 아닐때만 값전송하게
+            public void onClick(View v) {
+                //입력창에 메시지를 입력 후 버튼클릭했을 때
+                String msg = chatText.getText().toString();
+
                 if(msg != null){
-                    ChatData chat = new ChatData();
-                    chat.setNickname(nick);
+                    Chat chat = new Chat();
+                    chat.setName(nickname);
                     chat.setMsg(msg);
-                    myRef.push().setValue(chat); //setValue(chat)에서 수정 push() 붙였음
+
+                    //메시지를 파이어베이스에 보냄.
+                    myRef.push().setValue(chat);
+
+                    chatText.setText("");
                 }
 
             }
         });
-
-        mRecyclerView = findViewById(R.id.my_recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        //리사이클러뷰에 어댑터 적용
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
 
         chatList = new ArrayList<>();
-        //어뎁터
+        adapter = new ChatAdapter(chatList, nickname);
+        recyclerView.setAdapter(adapter);
 
-        //database 선언과 생성
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        myRef = database.getReference();
+        myRef = database.getReference("message");
 
+        //데이터들을 추가, 변경, 제거, 이동, 취소
         myRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                //어댑터에 DTO추가
+                Chat chat = snapshot.getValue(Chat.class);
+                ((ChatAdapter)adapter).addChat(chat);
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
     }
+
+
 }

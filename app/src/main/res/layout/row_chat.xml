@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:id="@+id/msgLinear"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
+    android:orientation="vertical">
 
-    <!--android:textAlignment="textEnd" 왼쪽 , 오른쪽 정렬-->
+
     <TextView
-        android:textSize="12sp"
-        android:id="@+id/TextView_nickname"
+        android:id="@+id/nameText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"/>
-    <TextView
-        android:textSize="20sp"
-        android:id="@+id/TextView_msg"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:textSize="14sp"
+        android:textStyle="bold"/>
 
+    <TextView
+        android:id="@+id/msgText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:background="@android:drawable/editbox_background"/>
 </LinearLayout>
